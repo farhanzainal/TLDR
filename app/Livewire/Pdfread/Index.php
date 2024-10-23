@@ -9,11 +9,16 @@ class Index extends Component
 {
     use WithFileUploads;
 
+    public $question;
     public $file;
     public $progress = 0;
     public $fileName;
 
     public $responseText;
+
+    public $sourceId;
+
+    public $questionAnswer;
 
     public function updateProgressBar()
     {
@@ -22,6 +27,40 @@ class Index extends Component
         }
     }
     
+
+    public function askQuestion()
+    {
+
+        
+        $apiKey = env('CHATPDF_API_KEY');
+        $url = 'https://api.chatpdf.com/v1/chats/message';
+
+        $client = new Client();
+        $response = $client->post($url, [
+            'headers' => [
+                'x-api-key' => $apiKey,
+                'Content-Type' => 'application/json',
+            ],
+            'json' => [
+                'sourceId' => $this->sourceId,
+                'messages' => [
+                    [
+                        'role' => 'user',
+                        'content' => $this->question,
+                    ],
+                ],
+            ],
+        ]);
+
+        $result = json_decode($response->getBody()->getContents(), true);
+        $message = $result['content'];
+        $this->questionAnswer = "\n\n <b>Question:</b> " . $this->question . "\n " . $message;
+    }
+    public function truncateFileName($fileName)
+    {
+        return substr($fileName, 0, 20) . (strlen($fileName) > 20 ? '...' : '');
+    }
+
     public function resetFile()
     {
         $this->responseText = null;
@@ -31,6 +70,8 @@ class Index extends Component
 
     public function generateResponse(String $sourceId)
     {
+
+        $this->sourceId = $sourceId;
 
         $content = "Can u tell me what this pdf is about ? and summarize it";
 
@@ -85,7 +126,7 @@ class Index extends Component
                    [
                        'name'     => 'file',
                        'contents' => fopen($this->file->getRealPath(), 'r'),
-                       'filename' => $this->file->getClientOriginalName(),
+                       'filename' => $this->truncateFileName($this->file->getClientOriginalName()),
                    ],
                ],
            ]);

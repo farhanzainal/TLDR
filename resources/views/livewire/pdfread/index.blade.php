@@ -1,8 +1,10 @@
 <div>
 
     @if(!$responseText)
-    <div class="flex items-center justify-center w-full mt-8">
-        <h1 class="text-xl font-bold sm:text-base">TL;IDFR (I dont fucking read)</h1>
+    <div class="flex w-full mt-8 px-4">
+        <div class="flex flex-col md:flex-row">
+            <h1 class="text-xl font-bold sm:text-base dark:text-white mb-2 md:mb-0"><i><s>RTFM</s></i> Let me read that for you</h1>
+        </div>
     </div>
 
     <form wire:submit.prevent="uploadFile" enctype="multipart/form-data">
@@ -44,21 +46,89 @@
 
     @endif
 
-    @if($responseText)
 
-        <div class="mt-4 py-4">
+        <div class="mt-4 py-4 ">
             <div class="flex w-full mt-3 px-4">
-              <div class="bg-white shadow-md p-4 w-full">
-                  <h2 class="text-xl font-semibold mb-4 dark:text-gray-800">Summary</h2>
-                  <p class="text-sm text-gray-600 whitespace-pre-line">{{ $responseText ?? 'No summary available yet.' }}
-                  </p>
+              <div class="bg-white shadow-md p-4 w-full print-me">
+                  <h2 class="text-xl font-semibold mb-4 dark:text-gray-800 flex justify-between items-center">
+                    <span>Summary</span>
+
+                    @if($responseText)
+                    <div class="flex items-center space-x-2">
+
+                        <button class="text-gray-600 hover:text-gray-800 exclude-print" onclick="printOnlyMe()">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                        </button>
+
+                        <span class="text-sm text-gray-600 cursor-pointer exclude-print" wire:click="resetFile">
+                            <b>X</b>
+                        </span>
+
+                    </div>
+                    @endif
+                  </h2>
+                  <p class="text-sm text-gray-600 whitespace-pre-line">{{ $responseText ?? 'Please upload a file first.' }}</p>
+
+                  @if($questionAnswer)
+                  <p class="text-sm text-gray-600 whitespace-pre-line">{!! $questionAnswer !!}</p>
+                  @endif
               </div>
             </div>
         </div>
-        <div class="flex justify-center mt-2 mb-5">
-            <button wire:click="resetFile" class="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
-                &lt; Back
-            </button>
+
+
+
+        
+        @if($responseText)
+        <div class="mt-4 px-4 py-8">
+            <form wire:submit.prevent="askQuestion" class="flex items-center">
+                <input 
+                type="text" 
+                wire:model.defer="question" 
+                placeholder="Ask anything about the PDF..." 
+                class="flex-grow p-2 text-black"
+                x-data="{}"
+                x-on:keydown.enter="$wire.askQuestion().then(() => { $el.value = ''; })"
+                x-ref="questionInput"
+            />
+            
+            <button 
+                wire:click="$wire.askQuestion().then(() => { $refs.questionInput.value = ''; })"
+                type="submit" 
+                class="px-4 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            >
+                
+                    <span wire:loading.remove wire:target="askQuestion">Ask</span>
+                    <span wire:loading wire:target="askQuestion">Generating...</span>
+                </button>
+            </form>
         </div>
-    @endif
+        @endif
+
+       
+
 </div>
+
+
+<script>
+    function printOnlyMe() {
+        var printContents = document.querySelector('.print-me').innerHTML;
+        var originalContents = document.body.innerHTML;
+
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = printContents;
+
+        var excludePrintElements = tempDiv.querySelectorAll('.exclude-print');
+        excludePrintElements.forEach(function(element) {
+            element.remove();
+        });
+
+        document.body.innerHTML = tempDiv.innerHTML;
+
+        window.print();
+
+        document.body.innerHTML = originalContents;
+    }
+    </script>
