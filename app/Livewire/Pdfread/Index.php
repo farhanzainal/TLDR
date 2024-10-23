@@ -25,6 +25,8 @@ class Index extends Component
     public function resetFile()
     {
         $this->responseText = null;
+        $this->progress = 0;
+        $this->file = null;
     }
 
     public function generateResponse(String $sourceId)
