@@ -3,3 +3,5 @@ API: https://www.chatpdf.com/docs/api/backend
 
 Update .env with your ChatPDF API key.
 CHATPDF_API_KEY=sec_xxxxxx
+
+![alt text](public/images/image.png)
