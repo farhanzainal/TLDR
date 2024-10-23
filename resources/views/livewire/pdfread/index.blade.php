@@ -1,8 +1,10 @@
 <div>
 
     @if(!$responseText)
-    <div class="flex items-center justify-center w-full mt-8">
-        <h1 class="text-xl font-bold sm:text-base">TL;IDFR (I dont fucking read)</h1>
+    <div class="flex w-full mt-8 px-4">
+        <div class="flex flex-col md:flex-row">
+            <h1 class="text-xl font-bold sm:text-base dark:text-white mb-2 md:mb-0"><i><s>RTFM</s></i> Let me read that for you</h1>
+        </div>
     </div>
 
     <form wire:submit.prevent="uploadFile" enctype="multipart/form-data">

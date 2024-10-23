@@ -22,6 +22,12 @@ class Index extends Component
         }
     }
     
+
+    public function truncateFileName($fileName)
+    {
+        return substr($fileName, 0, 20) . (strlen($fileName) > 20 ? '...' : '');
+    }
+
     public function resetFile()
     {
         $this->responseText = null;
@@ -85,7 +91,7 @@ class Index extends Component
                    [
                        'name'     => 'file',
                        'contents' => fopen($this->file->getRealPath(), 'r'),
-                       'filename' => $this->file->getClientOriginalName(),
+                       'filename' => $this->truncateFileName($this->file->getClientOriginalName()),
                    ],
                ],
            ]);
