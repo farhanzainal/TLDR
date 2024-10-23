@@ -66,6 +66,7 @@ class Index extends Component
         $this->responseText = null;
         $this->progress = 0;
         $this->file = null;
+        $this->questionAnswer = null;
     }
 
     public function generateResponse(String $sourceId)
