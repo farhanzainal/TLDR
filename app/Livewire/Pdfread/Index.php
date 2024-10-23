@@ -32,7 +32,7 @@ class Index extends Component
            $this->dispatchBrowserEvent('show-error', ['message' => 'Invalid File Type', 'duration' => 3000]);
            return;
        }
-       $apiKey = 'sec_5w2fYfl4A7zNYyV3JdVulWMvbSMo5ola';
+       $apiKey = env('CHATPDF_API_KEY');
        $url = 'https://api.chatpdf.com/v1/sources/add-file';
 
        $client = new \GuzzleHttp\Client();
@@ -68,6 +68,6 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.pdfread.index');
+        return view('livewire.pdfread.index')->layout('components.layout');
     }
 }
