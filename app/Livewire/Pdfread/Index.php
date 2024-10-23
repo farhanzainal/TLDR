@@ -3,6 +3,7 @@
 namespace App\Livewire\Pdfread;
 use Livewire\WithFileUploads;
 use Livewire\Component;
+use GuzzleHttp\Client;
 
 class Index extends Component
 {
@@ -10,17 +11,51 @@ class Index extends Component
 
     public $file;
     public $progress = 0;
+    public $fileName;
+
+    public $responseText;
 
     public function updateProgressBar()
     {
-        // This method will be called every 500ms by the wire:poll directive
-        // You can update the progress here based on the actual upload progress
-        // For now, we'll simulate progress
         if ($this->progress < 100) {
             $this->progress += 10;
         }
     }
     
+    public function resetFile()
+    {
+        $this->responseText = null;
+    }
+
+    public function generateResponse(String $sourceId)
+    {
+
+        $content = "Can u tell me what this pdf is about ? and summarize it";
+
+        $apiKey = env('CHATPDF_API_KEY');
+        $url = 'https://api.chatpdf.com/v1/chats/message';
+
+        $client = new Client();
+        $response = $client->post($url, [
+            'headers' => [
+                'x-api-key' => $apiKey,
+                'Content-Type' => 'application/json',
+            ],
+            'json' => [
+                'sourceId' => $sourceId,
+                'messages' => [
+                    [
+                        'role' => 'user',
+                        'content' => $content,
+                    ],
+                ],
+            ],
+        ]);
+
+        $result = json_decode($response->getBody()->getContents(), true);
+        $this->responseText = $result['content'];
+    }
+
     public function uploadFile()
     {
        $this->validate([
@@ -56,8 +91,12 @@ class Index extends Component
            $result = json_decode($response->getBody()->getContents(), true);
            // Handle the response as needed
            $this->progress = 100; // Set progress to 100% when upload is complete
+
+           $sourceId = $result['sourceId'];
          
-           return redirect()->route('chat', ['id' => $result['sourceId']]);
+           //then generate response
+           $this->generateResponse($sourceId);
+
        } catch (\Exception $e) {
            // Handle any errors
            $this->addError('file', 'Error uploading file: ' . $e->getMessage());
@@ -68,6 +107,9 @@ class Index extends Component
 
     public function render()
     {
+        if($this->file) {
+        $this->fileName = $this->file->getClientOriginalName();
+        }
         return view('livewire.pdfread.index')->layout('components.layout');
     }
 }
